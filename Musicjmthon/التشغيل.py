@@ -15,6 +15,44 @@ from youtubesearchpython import VideosSearch
 from config import HNDLR, bot, call_py
 from Musicjmthon.helpers.queues import QUEUE, add_to_queue, get_queue
 
+from io import BytesIO
+from traceback import format_exc
+
+import aiohttp
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from Python_ARQ import ARQ
+
+from config import HNDLR
+from MusicAndVideo.helpers.merrors import capture_err
+
+ARQ_API_KEY = "QFOTZM-GSZUFY-CHGHRX-TDEHOZ-ARQ"
+aiohttpsession = aiohttp.ClientSession()
+arq = ARQ("https://thearq.tech", ARQ_API_KEY, aiohttpsession)
+
+
+async def quotify(messages: list):
+    response = await arq.quotly(messages)
+    if not response.ok:
+        return [False, response.result]
+    sticker = response.result
+    sticker = BytesIO(sticker)
+    sticker.name = "sticker.webp"
+    return [True, sticker]
+
+
+def getArg(message: Message) -> str:
+    arg = message.text.strip().split(None, 1)[1].strip()
+    return arg
+
+
+def isArgInt(message: Message) -> bool:
+    count = getArg(message)
+    try:
+        count = int(count)
+        return [True, count]
+    except ValueError:
+        return [False, 0]
 
 # music player
 def ytsearch(query):
